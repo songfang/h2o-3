@@ -39,7 +39,7 @@ RUN \
   apt-get update -q -y && \
   echo debconf shared/accepted-oracle-license-v1-1 select true | debconf-set-selections && \
   echo debconf shared/accepted-oracle-license-v1-1 seen true | debconf-set-selections && \
-  DEBIAN_FRONTEND=noninteractive apt-get install -y oracle-java8-installer
+  EBIAN_FRONTEND=noninteractive apt-get install -y oracle-java8-installer
 
 # Install nodeJS
 RUN \
@@ -59,40 +59,29 @@ RUN \
   ln -sf /usr/local/share/phantomjs-2.1.1-linux-x86_64/bin/phantomjs /usr/local/bin && \
   apt-get clean
 
-# Install python dependencies
+# Copy required scripts
+COPY scripts/install_R_version scripts/install_R_versions scripts/install_python_dependencies /usr/sbin/
 RUN \
-  wget https://raw.githubusercontent.com/h2oai/h2o-3/master/h2o-py/requirements.txt && \
-  /usr/bin/pip install --upgrade pip && \
-  /usr/bin/pip install -r requirements.txt && \
-  /usr/bin/pip3 install --upgrade pip && \
-  /usr/bin/pip3 install -r requirements.txt && \
-  rm requirements.txt
-
-# Copy R installation script and install R with different versions
-COPY scripts/install_R_version scripts/install_R_versions /usr/sbin/
-RUN chmod 700 /usr/sbin/install_R_version && \
+  chmod 700 /usr/sbin/install_R_version && \
   chmod 700 /usr/sbin/install_R_versions && \
-  sync && \
-  install_R_versions
-ENV PATH ${PATH}:/usr/local/R/current/bin/
+  chmod 700 /usr/sbin/install_python_dependencies && \
+  sync
 
-# Install pythons and python dependencies
+# Install R with different versions
 RUN \
-  add-apt-repository -y ppa:deadsnakes/ppa && \
-  apt-get update
+  /usr/sbin/install_R_versions
+ENV \
+  PATH ${PATH}:/usr/local/R/current/bin/
 
-
-# Create users
-RUN \
-  useradd -m -c "H2O AI" -u ${H2O_USER_UID} h2oai -s /bin/bash
-
-USER h2oai
 # Create virtualenvs
 RUN \
-  virtualenv -p python2 /home/h2oai/venv/h2o-env-python2 && \
-  virtualenv -p python3 /home/h2oai/venv/h2o-env-python3
+  virtualenv -p python2 /envs/h2o_env_python2.7 && \
+  chmod a+w -R /envs/h2o_env_python2.7 && \
+  virtualenv -p python3 /envs/h2o_env_python3.5 && \
+  chmod a+w -R /envs/h2o_env_python3.5
 
-USER root
+# Install Python dependencies
+RUN /usr/sbin/install_python_dependencies
 
 # Expose ports for services
 EXPOSE 54321

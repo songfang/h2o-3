@@ -1,0 +1,17 @@
+#! /bin/bash
+
+set -e
+
+PYTHON_VERSIONS='3.5,2.7'
+
+wget https://raw.githubusercontent.com/h2oai/h2o-3/master/h2o-py/requirements.txt
+
+IFS=',' read -r -a array <<< ${PYTHON_VERSIONS}
+for python_version in "${array[@]}"; do
+  echo "Installing dependencies for Python ${python_version}"
+  source /envs/h2o_env_python${python_version}/bin/activate
+  pip install --upgrade pip
+  pip install -r requirements.txt
+done
+
+rm requirements.txt
