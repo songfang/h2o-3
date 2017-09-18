@@ -254,6 +254,8 @@ public class Merge {
     Vec[] vecs = new Vec(key, Vec.ESPC.rowLayout(key, espc)).makeCons(numColsInResult, 0, doms, types);
     System.out.println("took: " + (System.nanoTime() - t0) / 1e9);
 
+ //   writeFrameToCSV("/Users/wendycwong/temp/beforeSitch.csv", leftFrame, false, false);
+
     System.out.print("Finally stitch together by overwriting dummies ...");
     t0 = System.nanoTime();
     Frame fr = new Frame(names, vecs);
@@ -261,7 +263,9 @@ public class Merge {
     ff.doAll(fr);
     System.out.println("took: " + (System.nanoTime() - t0) / 1e9);
 
-    //Merge.cleanUp();
+//    writeFrameToCSV("/Users/wendycwong/temp/afterSitch.csv", leftFrame, false, false);
+
+    //Merge.cl.eanUp();
     return fr;
   }
 
