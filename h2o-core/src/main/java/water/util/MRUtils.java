@@ -195,6 +195,42 @@ public class MRUtils {
     }
   }
 
+  /**
+   * For a column that contains row indices, this task will count and make sure all
+   * the rows are present by looking for this row indices.
+   */
+  public static class CountAllRowsPresented extends MRTask<CountAllRowsPresented> {
+    int[] _counters;  // keep tracks of number of row indices
+    int _columnIndex;
+
+
+    public CountAllRowsPresented(int columnInd, Frame fr) {
+      if (fr.vec(columnInd).isCategorical() || fr.vec(columnInd).isInt()) {
+        _columnIndex = columnInd;
+        long numRows = fr.numRows();
+        _counters = new int[(int) numRows];
+        Arrays.fill(_counters, 1);  // initialize to all ones
+      } else {
+        throw new IllegalArgumentException("The column data type must be categorical or integer.");
+      }
+    }
+
+    public void map(Chunk[] chks) {
+      int numRows = chks[0].len();
+      for (int index = 0; index < numRows; index++) {
+        _counters[(int)chks[_columnIndex].at8(index)] -= 1;
+      }
+    }
+
+    public void findMissingRows() {
+      for (int index=0; index < _counters.length; index++) {
+        if (_counters[index] != 0) {
+          Log.info("Missing row "+index+" in final result with counter value "+_counters[index]);
+        }
+      }
+    }
+  }
+
   public static class Dist extends MRTask<Dist> {
     private IcedHashMap<IcedDouble,IcedAtomicInt> _dist;
     @Override public void map(Chunk ys) {

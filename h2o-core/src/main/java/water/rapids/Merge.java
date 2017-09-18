@@ -4,6 +4,8 @@ import water.*;
 import water.fvec.Chunk;
 import water.fvec.Frame;
 import water.fvec.Vec;
+import water.util.Log;
+import water.util.MRUtils;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -255,7 +257,8 @@ public class Merge {
     System.out.println("took: " + (System.nanoTime() - t0) / 1e9);
 
  //   writeFrameToCSV("/Users/wendycwong/temp/beforeSitch.csv", leftFrame, false, false);
-
+    Log.info("Around line 257");
+    new MRUtils.CountAllRowsPresented(2, leftFrame).doAll(leftFrame).findMissingRows();
     System.out.print("Finally stitch together by overwriting dummies ...");
     t0 = System.nanoTime();
     Frame fr = new Frame(names, vecs);
@@ -264,7 +267,8 @@ public class Merge {
     System.out.println("took: " + (System.nanoTime() - t0) / 1e9);
 
 //    writeFrameToCSV("/Users/wendycwong/temp/afterSitch.csv", leftFrame, false, false);
-
+    Log.info("Around line 70");
+    new MRUtils.CountAllRowsPresented(2, fr).doAll(fr).findMissingRows();
     //Merge.cl.eanUp();
     return fr;
   }
