@@ -386,8 +386,8 @@ def pyunit_exec(test_name):
     exec(pyunit_c, {})
 
 def standalone_test(test):
-    #h2o.init(strict_version_check=False)
-    h2o.init(strict_version_check=False, url='http://172.16.2.179:54321')
+    h2o.init(strict_version_check=False)
+    #h2o.init(strict_version_check=False, url='http://172.16.2.218:54321')
 
     h2o.remove_all()
 

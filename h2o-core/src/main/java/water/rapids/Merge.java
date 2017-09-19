@@ -256,6 +256,9 @@ public class Merge {
     Vec[] vecs = new Vec(key, Vec.ESPC.rowLayout(key, espc)).makeCons(numColsInResult, 0, doms, types);
     System.out.println("took: " + (System.nanoTime() - t0) / 1e9);
 
+    int numRep = new MRUtils.CountAllRowsPresented(2, leftFrame).doAll(leftFrame).findMissingRows();
+    Log.info("Number of rows missing "+numRep);
+
  //   writeFrameToCSV("/Users/wendycwong/temp/beforeSitch.csv", leftFrame, false, false);
     Log.info("Around line 257");
     new MRUtils.CountAllRowsPresented(2, leftFrame).doAll(leftFrame).findMissingRows();
@@ -270,6 +273,8 @@ public class Merge {
     Log.info("Around line 70");
     new MRUtils.CountAllRowsPresented(2, fr).doAll(fr).findMissingRows();
     //Merge.cl.eanUp();
+    numRep = new MRUtils.CountAllRowsPresented(2, fr).doAll(fr).findMissingRows();
+    Log.info("Number of rows missing "+numRep);
     return fr;
   }
 
