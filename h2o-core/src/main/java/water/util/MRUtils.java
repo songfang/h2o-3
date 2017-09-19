@@ -7,6 +7,7 @@ import water.MRTask;
 import water.fvec.*;
 import water.parser.BufferedString;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -236,12 +237,14 @@ public class MRUtils {
   public static class CountAllRowsPresented extends MRTask<CountAllRowsPresented> {
     int[] _counters;  // keep tracks of number of row indices
     int _columnIndex;
+    ArrayList<Integer> _badRows;
 
     public CountAllRowsPresented(int columnInd, Frame fr) {
       if (fr.vec(columnInd).isCategorical() || fr.vec(columnInd).isInt()) {
         _columnIndex = columnInd;
         long numRows = fr.numRows();
         _counters = new int[(int) numRows];
+        _badRows = new ArrayList<Integer>();
         Arrays.fill(_counters, 1);  // initialize to all ones
       } else {
         throw new IllegalArgumentException("The column data type must be categorical or integer.");
@@ -250,21 +253,22 @@ public class MRUtils {
 
     public void map(Chunk[] chks) {
       int numRows = chks[0].len();
-      int rStart = (int)chks[0].start();
       for (int index = 0; index < numRows; index++) {
-        _counters[(int)chks[_columnIndex].at8(index+rStart)] -= 1;
+        _counters[(int)chks[_columnIndex].at8(index)] -= 1;
       }
     }
 
-    public int findMissingRows() {
+    public ArrayList<Integer> findMissingRows() {
       int numBad = 0;
       for (int index=0; index < _counters.length; index++) {
         if (_counters[index] != 0) {
           numBad++;
+          _badRows.add(index);
           Log.info("Missing row "+index+" in final result with counter value "+_counters[index]);
         }
       }
-      return numBad;
+      Log.info("Total number of problem rows: "+numBad);
+      return _badRows;
     }
   }
 

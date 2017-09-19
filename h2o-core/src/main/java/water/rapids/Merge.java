@@ -54,11 +54,22 @@ public class Merge {
       }
     }
 
+    if (leftFrame.numRows() > 0) {
+      Log.info("Around line 58 before doing anything");
+      ArrayList<Integer> numRep = new MRUtils.CountAllRowsPresented(2, leftFrame).doAll(leftFrame).findMissingRows();
+      Log.info("Number of rows missing " + numRep.size());
+    }
     // Running 3 consecutive times on an idle cluster showed that running left
     // and right in parallel was a little slower (97s) than one by one (89s).
     // TODO: retest in future
     RadixOrder leftIndex = createIndex(true ,leftFrame,leftCols,id_maps);
     RadixOrder riteIndex = createIndex(false,riteFrame,riteCols,id_maps);
+
+    if (leftFrame.numRows() > 0) {
+      Log.info("Around line 69 after createIndex");
+      ArrayList<Integer> numRep = new MRUtils.CountAllRowsPresented(2, leftFrame).doAll(leftFrame).findMissingRows();
+      Log.info("Number of rows missing " + numRep.size());
+    }
 
     // TODO: start merging before all indexes had been created. Use callback?
 
@@ -256,12 +267,13 @@ public class Merge {
     Vec[] vecs = new Vec(key, Vec.ESPC.rowLayout(key, espc)).makeCons(numColsInResult, 0, doms, types);
     System.out.println("took: " + (System.nanoTime() - t0) / 1e9);
 
-    int numRep = new MRUtils.CountAllRowsPresented(2, leftFrame).doAll(leftFrame).findMissingRows();
-    Log.info("Number of rows missing "+numRep);
+    if (leftFrame.numRows() > 0) {
+      Log.info("Around line 257");
+      ArrayList<Integer> numRep = new MRUtils.CountAllRowsPresented(2, leftFrame).doAll(leftFrame).findMissingRows();
+      Log.info("Number of rows missing " + numRep.size());
+    }
 
  //   writeFrameToCSV("/Users/wendycwong/temp/beforeSitch.csv", leftFrame, false, false);
-    Log.info("Around line 257");
-    new MRUtils.CountAllRowsPresented(2, leftFrame).doAll(leftFrame).findMissingRows();
     System.out.print("Finally stitch together by overwriting dummies ...");
     t0 = System.nanoTime();
     Frame fr = new Frame(names, vecs);
@@ -270,11 +282,12 @@ public class Merge {
     System.out.println("took: " + (System.nanoTime() - t0) / 1e9);
 
 //    writeFrameToCSV("/Users/wendycwong/temp/afterSitch.csv", leftFrame, false, false);
-    Log.info("Around line 70");
-    new MRUtils.CountAllRowsPresented(2, fr).doAll(fr).findMissingRows();
-    //Merge.cl.eanUp();
-    numRep = new MRUtils.CountAllRowsPresented(2, fr).doAll(fr).findMissingRows();
-    Log.info("Number of rows missing "+numRep);
+    if (fr.numRows() > 0) {
+      Log.info("Around line 280");
+      //Merge.cl.eanUp();
+      ArrayList<Integer> numRep = new MRUtils.CountAllRowsPresented(2, fr).doAll(fr).findMissingRows();
+      Log.info("Number of rows missing " + numRep.size());
+    }
     return fr;
   }
 
