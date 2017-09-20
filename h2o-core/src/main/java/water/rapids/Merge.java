@@ -11,6 +11,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 
 import static water.rapids.SingleThreadRadixOrder.getSortedOXHeaderKey;
+import static water.util.MRUtils.compareTwoList;
 
 public class Merge {
 
@@ -54,22 +55,22 @@ public class Merge {
       }
     }
 
-    if (leftFrame.numRows() > 0) {
+/*    if (leftFrame.numRows() > 0) {
       Log.info("Around line 58 before doing anything");
       ArrayList<Long> numRep = new MRUtils.CountAllRowsPresented(2, leftFrame).doAll(leftFrame).findMissingRows();
       Log.info("Number of rows missing " + numRep.size());
-    }
+    }*/
     // Running 3 consecutive times on an idle cluster showed that running left
     // and right in parallel was a little slower (97s) than one by one (89s).
     // TODO: retest in future
     RadixOrder leftIndex = createIndex(true ,leftFrame,leftCols,id_maps);
     RadixOrder riteIndex = createIndex(false,riteFrame,riteCols,id_maps);
 
-    if (leftFrame.numRows() > 0) {
+/*    if (leftFrame.numRows() > 0) {
       Log.info("Around line 69 after createIndex");
       ArrayList<Long> numRep = new MRUtils.CountAllRowsPresented(2, leftFrame).doAll(leftFrame).findMissingRows();
       Log.info("Number of rows missing " + numRep.size());
-    }
+    }*/
 
     // TODO: start merging before all indexes had been created. Use callback?
 
@@ -267,10 +268,12 @@ public class Merge {
     Vec[] vecs = new Vec(key, Vec.ESPC.rowLayout(key, espc)).makeCons(numColsInResult, 0, doms, types);
     System.out.println("took: " + (System.nanoTime() - t0) / 1e9);
 
+    ArrayList<Long> num1=null;
+    ArrayList<Long> num2=null;
     if (leftFrame.numRows() > 0) {
       Log.info("Around line 257");
-      ArrayList<Long> numRep = new MRUtils.CountAllRowsPresented(2, leftFrame).doAll(leftFrame).findMissingRows();
-      Log.info("Number of rows missing " + numRep.size());
+      num1 = new MRUtils.CountIntValueRows(255553556456l, 0, leftFrame).doAll(leftFrame)._specialRows;
+      Log.info("Number of rows missing " + num1.size());
     }
 
  //   writeFrameToCSV("/Users/wendycwong/temp/beforeSitch.csv", leftFrame, false, false);
@@ -285,9 +288,12 @@ public class Merge {
     if (fr.numRows() > 0) {
       Log.info("Around line 280");
       //Merge.cl.eanUp();
-      ArrayList<Long> numRep = new MRUtils.CountAllRowsPresented(2, fr).doAll(fr).findMissingRows();
-      Log.info("Number of rows missing " + numRep.size());
+      num2 = new MRUtils.CountIntValueRows(255553556456l, 0, fr).doAll(fr)._specialRows;
+      Log.info("Number of rows missing " + num2.size());
     }
+
+    ArrayList<Long> diff = compareTwoList(num1, num2);
+    Log.info("Size difference is "+(num2.size()-num1.size()));
     return fr;
   }
 

@@ -169,6 +169,7 @@ public class MRUtils {
     public long _numberAppear;
     public long _value;
     public int _columnIndex;  // column where the values are to be counted
+    public ArrayList<Long> _specialRows;
 
 
     public CountIntValueRows(long value, int columnInd, Frame fr) {
@@ -176,6 +177,7 @@ public class MRUtils {
         _value = value;
         _columnIndex = columnInd;
         _numberAppear = 0;
+        _specialRows = new ArrayList<Long>();
       } else {
         throw new IllegalArgumentException("The column data type must be categorical or integer.");
       }
@@ -184,8 +186,11 @@ public class MRUtils {
     public void map(Chunk[] chks) {
       int numRows = chks[0].len();
       for (int index = 0; index < numRows; index++) {
-        if (chks[_columnIndex].at8(index) == _value)
+        if (chks[_columnIndex].at8(index) == _value) {
+          _specialRows.add(chks[1].at8(index));
           _numberAppear++;
+        }
+
       }
     }
 
@@ -196,6 +201,17 @@ public class MRUtils {
     public long getNumberAppear() {
       return _numberAppear;
     }
+  }
+
+  public static ArrayList<Long> compareTwoList(ArrayList<Long> orig, ArrayList<Long> newL) {
+    ArrayList<Long> diffs = new ArrayList<Long>();
+
+    for (long val1:newL) {
+      if (!orig.contains(val1)) {
+        diffs.add(val1);
+      }
+    }
+    return diffs;
   }
 
   /**
