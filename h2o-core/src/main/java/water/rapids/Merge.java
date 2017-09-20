@@ -56,7 +56,7 @@ public class Merge {
 
     if (leftFrame.numRows() > 0) {
       Log.info("Around line 58 before doing anything");
-      ArrayList<Integer> numRep = new MRUtils.CountAllRowsPresented(2, leftFrame).doAll(leftFrame).findMissingRows();
+      ArrayList<Long> numRep = new MRUtils.CountAllRowsPresented(2, leftFrame).doAll(leftFrame).findMissingRows();
       Log.info("Number of rows missing " + numRep.size());
     }
     // Running 3 consecutive times on an idle cluster showed that running left
@@ -67,7 +67,7 @@ public class Merge {
 
     if (leftFrame.numRows() > 0) {
       Log.info("Around line 69 after createIndex");
-      ArrayList<Integer> numRep = new MRUtils.CountAllRowsPresented(2, leftFrame).doAll(leftFrame).findMissingRows();
+      ArrayList<Long> numRep = new MRUtils.CountAllRowsPresented(2, leftFrame).doAll(leftFrame).findMissingRows();
       Log.info("Number of rows missing " + numRep.size());
     }
 
@@ -269,7 +269,7 @@ public class Merge {
 
     if (leftFrame.numRows() > 0) {
       Log.info("Around line 257");
-      ArrayList<Integer> numRep = new MRUtils.CountAllRowsPresented(2, leftFrame).doAll(leftFrame).findMissingRows();
+      ArrayList<Long> numRep = new MRUtils.CountAllRowsPresented(2, leftFrame).doAll(leftFrame).findMissingRows();
       Log.info("Number of rows missing " + numRep.size());
     }
 
@@ -285,7 +285,7 @@ public class Merge {
     if (fr.numRows() > 0) {
       Log.info("Around line 280");
       //Merge.cl.eanUp();
-      ArrayList<Integer> numRep = new MRUtils.CountAllRowsPresented(2, fr).doAll(fr).findMissingRows();
+      ArrayList<Long> numRep = new MRUtils.CountAllRowsPresented(2, fr).doAll(fr).findMissingRows();
       Log.info("Number of rows missing " + numRep.size());
     }
     return fr;

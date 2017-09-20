@@ -9,6 +9,7 @@ import water.parser.BufferedString;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Random;
 
 import static water.util.RandomUtils.getRNG;
@@ -235,17 +236,19 @@ public class MRUtils {
    * the rows are present by looking for this row indices.
    */
   public static class CountAllRowsPresented extends MRTask<CountAllRowsPresented> {
-    int[] _counters;  // keep tracks of number of row indices
+    HashMap<Long, Integer> _counters;  // keep tracks of number of row indices
     int _columnIndex;
-    ArrayList<Integer> _badRows;
+    ArrayList<Long> _badRows;
 
     public CountAllRowsPresented(int columnInd, Frame fr) {
       if (fr.vec(columnInd).isCategorical() || fr.vec(columnInd).isInt()) {
         _columnIndex = columnInd;
         long numRows = fr.numRows();
-        _counters = new int[(int) numRows];
-        _badRows = new ArrayList<Integer>();
-        Arrays.fill(_counters, 1);  // initialize to all ones
+        _counters = new HashMap<Long, Integer>();
+        _badRows = new ArrayList<Long>();
+        for (long index = 0; index < fr.numRows(); index++) {
+          _counters.put(index, 1);
+        }
       } else {
         throw new IllegalArgumentException("The column data type must be categorical or integer.");
       }
@@ -254,17 +257,18 @@ public class MRUtils {
     public void map(Chunk[] chks) {
       int numRows = chks[0].len();
       for (int index = 0; index < numRows; index++) {
-        _counters[(int)chks[_columnIndex].at8(index)] -= 1;
+        long temp = chks[_columnIndex].at8(index);
+        _counters.put(temp, _counters.get(temp)-1);
       }
     }
 
-    public ArrayList<Integer> findMissingRows() {
+    public ArrayList<Long> findMissingRows() {
       int numBad = 0;
-      for (int index=0; index < _counters.length; index++) {
-        if (_counters[index] != 0) {
+      for (long index=0; index < _counters.size(); index++) {
+        if (_counters.get(index) != 0) {
           numBad++;
           _badRows.add(index);
-          Log.info("Missing row "+index+" in final result with counter value "+_counters[index]);
+          Log.info("Missing row "+index+" in final result with counter value "+_counters.get(index));
         }
       }
       Log.info("Total number of problem rows: "+numBad);
