@@ -31,7 +31,8 @@ public class ParquetParserProvider extends ParserProvider {
   public ParseSetup guessSetup(ByteVec vec, byte[] bits, byte sep, int ncols, boolean singleQuotes,
                                int checkHeader, String[] columnNames, byte[] columnTypes,
                                String[][] domains, String[][] naStrings) {
-    return ParquetParser.guessSetup(vec, bits);
+    ParquetParser.ParquetParseSetup initSetup = ParquetParser.guessSetup(vec, bits);
+    return ParquetParser.finalizeSetup(vec, initSetup);
   }
 
   @Override
